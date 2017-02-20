@@ -9,26 +9,20 @@ class Apidata:
         self.url_rank = []
         self.app_req = {}
         pass
+    def Fetchinfo(self,api_dom,api_element,api_attrib):
+        for child in api_dom.getElementsByTagName(api_element):
+            if child.hasAttribute(api_attrib):
+                return child.attributes[api_attrib].value
+                break
+        return -1
     def Urlrank(self,url_host):
         #print url_host
         self.api_path = 'http://data.alexa.com/data?cli=10&dat=snbamz&url='+url_host
         try:
             self.api_xml = urllib2.urlopen(self.api_path)
-            print self.api_xml
             self.api_dom = minidom.parse(self.api_xml)
-            self.element = 'REACH'
-            self.attrib = 'RANK'
-            for child in dom.getElementsByTagName(self.element):
-                if child.hasAttribute(self.attrib):
-                    self.rank_url_host = child.attributes[self.attrib].value
-                    break
-            self.element = 'COUNTRY'
-            self.attrib = 'RANK'
-            for child in dom.getElementsByTagName(self.element):
-                if child.hasAttribute(self.attrib):
-                    self.rank_country_url = child.attributes[self.attrib].value
-            self.url_rank.append(self.rank_url_host)
-            self.url_rank.appned(self.rank_country_url)
+            self.url_rank.append(self.Fetchinfo(self.api_dom,'REACH','RANK'))
+            self.url_rank.append(self.Fetchinfo(self.api_dom,'COUNTRY','RANK'))
             return self.url_rank
         except :
             return[-1,-1]
@@ -37,9 +31,9 @@ class Apidata:
         self.app_name = "Phishing-Website-Detector"
         self.app_ver = "1.0"
         self.app_req = {}
-        self.app_req["client"] = app_name
-        self.app_req["apikey"] = app_api_key
-        self.app_req["appver"] = app_ver
+        self.app_req["client"] = self.app_name
+        self.app_req["apikey"] = self.app_api_key
+        self.app_req["appver"] = self.app_ver
         self.app_req["pver"] = "3.0"
         self.app_req["url"] = url_address #change to check type of url
 
@@ -74,7 +68,7 @@ class Weburlfeature():
         url_security_words=['confirm', 'account', 'banking', 'secure', 'ebayisapi', 'webscr', 'login', 'signin']
         count  = 0
         for child in url_security_words:
-            if url_token.find(child)!=-1:
+            if child in url_token:
                 count+=1;
         return count
     def Checkipexistence(self,url_token):
@@ -82,7 +76,7 @@ class Weburlfeature():
         for child in url_token:
             if unicode(child).isnumeric():
                 count = count+1
-            else
+            else:
                 if count >= 4:
                     return 1
                 else:
@@ -103,7 +97,9 @@ class Weburlfeature():
         if len(url_address)==0:
             return[0,0,0]
         token_data = re.split('\W+',url_address)
-        total_count ,total_sum,maximum=0
+        total_count=0
+        total_sum=0
+        maximum=0
         for child in token_data:
             total_sum = total_sum+len(child)
             if len(child)!=0:
@@ -129,15 +125,16 @@ class Weburlfeature():
         self.feature_extracted['rank_url_host'] = self.url_rank[0]
         self.feature_extracted['rank_country_url'] = self.url_rank[1]
         self.feature_extracted['url_host_len'] = len(self.url_netloc)
-        self.feature_extracted['url_len'] = len(self.url_address)
+        self.feature_extracted['url_len'] = len(url_address)
         self.feature_extracted['url_asn_no']= self.web_feature_reference.Urlasn(self.url_netloc)
         self.feature_extracted['avg_url_token_len'],self.feature_extracted['url_token_count'],self.feature_extracted['url_token_max'] =self.web_feature_reference.Urltokendata(url_address)
         self.feature_extracted['avg_url_host_len'],self.feature_extracted['url_host_count'],self.feature_extracted['url_host_max'] =self.web_feature_reference.Urltokendata(self.url_netloc)
         self.feature_extracted['avg_url_path_len'],self.feature_extracted['url_path_count'],self.feature_extracted['url_path_max'] =self.web_feature_reference.Urltokendata(self.url_path)
         self.feature_extracted['url_safe_browsing'] =self.api_data.Urlsafebrowsing(url_address)
-        self.feature_extracted['url_dots'] = url_address.input.count('.')
-        self.feature_extracted['url_security_words_count'] = self.web_feature_reference.Urlsecurity(self.tokens_words)
-        self.feature_extracted['ipaddress_existence'] = self.web_feature_reference.Checkipexistence(self.tokens_words)
+        self.feature_extracted['url_dots'] = url_address.count('.')
+        self.feature_extracted['url_security_words_count'] = self.web_feature_reference.Urlsecurity(self.token_words)
+        self.feature_extracted['ipaddress_existence'] = self.web_feature_reference.Checkipexistence(self.token_words)
         #print self.feature_extracted['rank_url_host']
         #print self.feature_extracted['rank_country_url']
+        return self.feature_extracted
         pass
