@@ -34,7 +34,7 @@ class Apidata:
             return[-1,-1]
     def Urlsafebrowsing(self,url_address):
         self.app_api_key = "ABQIAAAA8C6Tfr7tocAe04vXo5uYqRTEYoRzLFR0-nQ3fRl5qJUqcubbrw"
-        self.app_name = "URL_check"
+        self.app_name = "Phishing-Website-Detector"
         self.app_ver = "1.0"
         self.app_req = {}
         self.app_req["client"] = app_name
